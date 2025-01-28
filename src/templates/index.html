@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Generate Report</h2>
+        <form id="fileForm">
+            <div class="input-group">
+                <label for="file1">File Stayflexi :</label>
+                <input type="file" id="file1" accept=".xlsx, .csv"><br><br>
+            </div>
+            
+            <div class="input-group">
+                <label for="file2">File MMT :</label>
+                <input type="file" id="file2" accept=".xlsx, .csv"><br><br>
+            </div>
+
+            <button type="button" id="submitFiles">Download Report</button>
+
+            <div id="alertMessage" class="alert"></div>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+
+
+  
+</body>
+</html>
