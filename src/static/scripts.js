@@ -1,9 +1,20 @@
+$(document).ready(function () {
+
+$("#slider").on("input", function () {
+    $("#sliderValue").text($(this).val()); // Update value next to slider
+});
+
 $('#submitFiles').on('click', function () {
     const file1 = $('#file1')[0].files[0];
     const file2 = $('#file2')[0].files[0];
+    const file3 = $('#file3')[0].files[0];  // Optional file3
+    const file4 = $('#file4')[0].files[0];  // Optional file4
 
     console.log("file 1 :",file1);
     console.log("FIle 2 :",file2);
+    const sliderValue = $('#slider').val(); // Get slider value
+
+    console.log("Selected Slider Value:", sliderValue); // Debugging
 
     if (!file1 || !file2) {
         alert('Please select both files.');
@@ -13,6 +24,16 @@ $('#submitFiles').on('click', function () {
     const formData = new FormData();
     formData.append('file1', file1);
     formData.append('file2', file2);
+    formData.append('sliderValue', sliderValue);
+
+    if (file3) {
+        formData.append('file3', file3);
+    }
+
+    if (file4) {
+        formData.append('file4', file4);
+    }
+
 
     // AJAX call to upload files and trigger download
     $.ajax({
@@ -26,13 +47,15 @@ $('#submitFiles').on('click', function () {
     // },
     success: function(response) {
             if (response.status) {
-                console.log("download url :",response.download_url);
+                console.log("Download URL:", response.download_url);
+
                 // If the response is successful, handle the file download
-                var downloadLink = document.createElement('a');
-                console.log("downloadlink :",downloadLink);
+                const downloadLink = document.createElement('a');
                 downloadLink.href = response.download_url;  // URL to the file
                 downloadLink.download = response.download_name; // Suggested filename for download
+                document.body.appendChild(downloadLink);
                 downloadLink.click();  // Trigger the download
+                document.body.removeChild(downloadLink);  // Clean up
             } else {
                 // Handle failure scenario (e.g., show an error message)
                 alert(response.message);
@@ -44,4 +67,6 @@ $('#submitFiles').on('click', function () {
     }
 
 });
+});
+
 });

@@ -2,17 +2,19 @@ from flask import Flask, request, render_template, jsonify, send_file,url_for,se
 from werkzeug.utils import secure_filename
 import os
 import pandas as pd
+import numpy as np
 import uuid
 
 from mmt import mmt_result
 from stayflexi import stayflexi
+from old_pending import update_pending
 
 app = Flask(__name__)
 
 # Configuration
 UPLOAD_FOLDER = 'docs/files'
 
-ALLOWED_EXTENSIONS = {'xlsx'}
+ALLOWED_EXTENSIONS = {'xlsx','csv'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB limit
 
@@ -35,6 +37,15 @@ def upload_files():
 
     file1 = request.files['file1']
     file2 = request.files['file2']
+    file3 = request.files.get('file3')  # Optional file
+    file4 = request.files.get('file4')  # Optional file
+    commission = (int(request.form.get('sliderValue')))/100
+    print("commission:",commission)
+    # if not commission or not commission.isdigit():
+    #     commission = 30
+
+    print("file1:", file1)
+    print("file2:", file2)
 
     if file1 and allowed_file(file1.filename) and file2 and allowed_file(file2.filename):
         filename1 = secure_filename(file1.filename)
@@ -42,6 +53,24 @@ def upload_files():
 
         file1.save(os.path.join(app.config['UPLOAD_FOLDER'], filename1))
         file2.save(os.path.join(app.config['UPLOAD_FOLDER'], filename2))
+
+        file3 = request.files.get('file3')  # Optional file
+        file4 = request.files.get('file4')  # Optional file
+
+        if file3 and allowed_file(file3.filename):
+            filename3 = secure_filename(file3.filename)
+            file3.save(os.path.join(app.config['UPLOAD_FOLDER'], filename3))
+            # Optionally process file3 if needed
+        if file4 and allowed_file(file4.filename):
+            filename4 = secure_filename(file4.filename)
+            file4.save(os.path.join(app.config['UPLOAD_FOLDER'], filename4))
+
+        if file3 and file4:
+            print("file3 and file4")
+            old_final_data_path = update_pending(os.path.join(app.config['UPLOAD_FOLDER'], filename3),os.path.join(app.config['UPLOAD_FOLDER'], filename4))
+            old_data = pd.read_excel(old_final_data_path)
+        else:
+            old_data = None
 
         try:
             print('start stayflexipath')
@@ -57,18 +86,74 @@ def upload_files():
             print('final_data_path:', final_data_path)
 
             final_data = pd.read_excel(final_data_path)
-            final_data['gst on commssion'] = ((final_data['Room Charges (A)']) * 0.30) * 0.18
-            final_data['GST TB commission'] = ((final_data["Room Charges (A)"]) * 0.30)
+            print("final_data:",final_data)
+            if old_data is not None:
+                final_data = pd.concat([final_data, old_data], ignore_index=True)
+                # final_data.drop_duplicates(subset=['BookingID', 'Customer Name', 'Booking Vendor', 'Check-in', 'Check-out'], inplace=True)
+                print("final_data after concat:",final_data)   
+
+            print("old data is none") 
+
+            # final_data['GST on commission'] = ((final_data['Room Charges (A)']) * 0.30) * 0.18
+            # final_data['TB commission'] = ((final_data["Room Charges (A)"]) * 0.30)
+            # final_data['PayToHotel'] = final_data['Room Charges (A)'] - (
+            #     final_data['GST on commission'] + ((final_data["Room Charges (A)"]) * 0.30)
+            # )
+            final_data['GST on commission'] = ((final_data['Room Charges (A)']) * commission) * 0.18
+            final_data['TB commission'] = ((final_data["Room Charges (A)"]) * commission)
             final_data['PayToHotel'] = final_data['Room Charges (A)'] - (
-                final_data['gst on commssion'] + ((final_data["Room Charges (A)"]) * 0.30)
+                final_data['GST on commission'] + ((final_data["Room Charges (A)"]) * (commission))
             )
             final_data['final commission'] = final_data['Amount Paid'] - final_data['PayToHotel']
 
+            print("final dat acoluumns :",final_data.columns)
+            pay_to_hotel_sum = final_data['PayToHotel'].sum()
+            print("pay_to_hotel_sum:", pay_to_hotel_sum)
+            final_commission_sum = final_data['final commission'].sum()
+            print("final_commission_sum:", final_commission_sum)
+            total_amount_paid = final_data['Amount Paid'].sum()
+            print("total_amount_paid:", total_amount_paid)
+
+            
+
+            # Create a new row with NaN for other columns and the sums for 'PayToHotel' and 'FinalCommission'
+            new_row = {
+                'BookingID': f"After ({100*commission}%) Total",  # or you can use None if you prefer
+                'Customer Name': np.nan,
+                'Booking Vendor': np.nan,
+                'Room Charges (A)': np.nan,
+                'Amount Paid': np.round(total_amount_paid),
+                'Payment Status': np.nan,
+                'Check-in': np.nan,
+                'Check-out': np.nan,
+                'Payment Date': np.nan,
+                'GST on commission': np.nan,
+                'TB commission': np.nan,
+                'PayToHotel': np.round(pay_to_hotel_sum),
+                'final commission': np.round(final_commission_sum)
+            }
+
+
+            new_df = pd.DataFrame([new_row])
+            print("new_df:",new_df)
+            print("shape of after append final data:",final_data.shape)
+            final_data = pd.concat([final_data, new_df], ignore_index=True)
+
+            print("shape of after append final data:",final_data.shape)
+
+            # Append the new row to the DataFrame
+            # final_data = final_data.append(new_row, ignore_index=True)
+            print("new row append")
+
             os.makedirs('docs/report', exist_ok=True)
             unique_id = uuid.uuid4().hex
-            report_filename = f'report_{unique_id}_{filename2}'
+            print("unique_id:", unique_id)
+            report_filename = f'report_{unique_id}_.xlsx'
+            print("report_filename:", report_filename)
             report_path = os.path.join('docs/report', report_filename)
             final_data.to_excel(report_path, index=False)
+
+            print("final data excel made successfully")
 
             # download_url = url_for('download_file', filename=report_filename, _external=True)
 

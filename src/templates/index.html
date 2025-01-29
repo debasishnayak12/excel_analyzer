@@ -20,6 +20,22 @@
                 <input type="file" id="file2" accept=".xlsx, .csv"><br><br>
             </div>
 
+            <div class="input-group">
+                <label for="file3">Prev Week Old MMT:</label>
+                <input type="file" id="file3" accept=".xlsx, .csv"><br><br>
+            </div>
+            
+            <div class="input-group">
+                <label for="file4">Prev Week New MMT:</label>
+                <input type="file" id="file4" accept=".xlsx, .csv"><br><br>
+            </div>
+
+            <div class="input-group">
+                <label for="slider">Commission Percentage Value (1-50):</label>
+                <input type="range" id="slider" min="1" max="50" value="30">
+                <span id="sliderValue" style="font-weight: bold; margin-left: 10px;">30</span>
+            </div>
+
             <button type="button" id="submitFiles">Download Report</button>
 
             <div id="alertMessage" class="alert"></div>

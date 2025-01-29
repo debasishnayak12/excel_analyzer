@@ -17,7 +17,6 @@ def mmt_result(file1, file2):
         df_mmt = pd.read_csv(file1)
     df_flexi= pd.read_excel(file2)
     df_flexi.rename(columns={
-    'Booking Id': 'BookingID', 
     'Guest': 'Customer Name', 
     'Source': 'Booking Vendor', 
     'Check In Date': 'Check-in', 
@@ -43,7 +42,7 @@ def mmt_result(file1, file2):
 
     # Select important columns to save
     important_columns = [
-        'Customer Name', 'Booking Vendor','Room Charges (A)','Amount Paid', 'Payment Status', 
+        'BookingID','Customer Name', 'Booking Vendor','Room Charges (A)','Amount Paid', 'Payment Status', 'Check-in','Check-out',
         'Payment Date'
     ]
 
