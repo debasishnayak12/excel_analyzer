@@ -9,6 +9,7 @@ from mmt import mmt_result
 from stayflexi import stayflexi
 from old_pending import update_pending
 from bking import stayflexiBookingcom,cancelled
+from jointreport import jointreport
 
 app = Flask(__name__)
 
@@ -40,6 +41,7 @@ def upload_files():
     file2 = request.files['file2']
     file3 = request.files.get('file3')  # Optional file
     file4 = request.files.get('file4')  # Optional file
+    bookingcomcheck = request.form.get('bookingcheck')
     commission = (int(request.form.get('sliderValue')))/100
     print("commission:",commission)
     # if not commission or not commission.isdigit():
@@ -80,7 +82,6 @@ def upload_files():
                 return jsonify({'status': False, 'message': 'Error processing file1'}), 500
             print('stayflexipath:', stayflexipath)
             
-            # stayflexiBookingcompath = stayflexiBookingcom((os.path.join(app.config['UPLOAD_FOLDER'], filename1)),commission)
 
             print('start mmt')
             final_data_path = mmt_result(os.path.join(app.config['UPLOAD_FOLDER'], filename2), stayflexipath)
@@ -144,9 +145,16 @@ def upload_files():
 
             print("shape of after append final data:",final_data.shape)
 
-            # Append the new row to the DataFrame
-            # final_data = final_data.append(new_row, ignore_index=True)
-            print("new row append")
+            if bookingcomcheck == 'Yes':
+                print("bookingcomcheck is on")
+                bookingcompath = stayflexiBookingcom(os.path.join(app.config['UPLOAD_FOLDER'], filename1),commission)
+                print("bookingcompath:",bookingcompath)
+                dookingdata = pd.read_excel(bookingcompath)
+                finaldatapath =  jointreport(final_data,dookingdata)
+                print("bkng data path :",finaldatapath)
+                final_data = pd.read_excel(finaldatapath)
+                print("bkng data path 2:",bookingcompath)
+
 
             os.makedirs('docs/report', exist_ok=True)
             unique_id = uuid.uuid4().hex
