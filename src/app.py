@@ -8,6 +8,7 @@ import uuid
 from mmt import mmt_result
 from stayflexi import stayflexi
 from old_pending import update_pending
+from bookingcom import stayflexiBookingcom,cancelled
 
 app = Flask(__name__)
 
@@ -78,6 +79,8 @@ def upload_files():
             if not stayflexipath or not os.path.exists(stayflexipath):
                 return jsonify({'status': False, 'message': 'Error processing file1'}), 500
             print('stayflexipath:', stayflexipath)
+            
+            stayflexiBookingcompath = stayflexiBookingcom((os.path.join(app.config['UPLOAD_FOLDER'], filename1)),commission)
 
             print('start mmt')
             final_data_path = mmt_result(os.path.join(app.config['UPLOAD_FOLDER'], filename2), stayflexipath)
@@ -169,6 +172,117 @@ def upload_files():
             return jsonify({'status': False, 'message': f'Error: {str(e)}'}), 500
     else:
         return jsonify({'status': False, 'message': 'Only .xlsx files are allowed!'}), 400
+    
+
+@app.route('/bookingcomreport', methods=['POST'])
+def bkngcomreport():
+    if 'file1' not in request.files :
+        return jsonify({'status': False, 'message': 'stayflexi file  required!'}), 400
+
+    file1 = request.files.get('file1')
+    commission = (int(request.form.get('sliderValue')))/100
+    print("commission:",commission)
+    # file2 = request.files.get('file2')
+    # file3 = request.files.get('file3')  # Optional file
+    # file4 = request.files.get('file4')  # Optional file
+    # commission = (int(request.form.get('sliderValue')))/100
+    
+    # if not commission or not commission.isdigit():
+    #     commission = 30
+
+    print("file1:", file1)
+
+    if file1 and allowed_file(file1.filename):
+            filename1 = secure_filename(file1.filename)
+            file1.save(os.path.join(app.config['UPLOAD_FOLDER'], filename1))
+            # Optionally process file3 if needed
+
+        
+    try:
+        
+        bookingcompath = stayflexiBookingcom((os.path.join(app.config['UPLOAD_FOLDER'], filename1)),commission)
+        print("bkng data path :",bookingcompath)
+
+        
+        final_df = pd.read_excel(bookingcompath)
+
+        os.makedirs('docs/Bookingcomreport', exist_ok=True)
+        unique_id = uuid.uuid4().hex
+        print("unique_id:", unique_id)
+        report_filename = f'bookingcom_report_{unique_id}_.xlsx'
+        print("report_filename:", report_filename)
+        report_path = os.path.join('docs/report', report_filename)
+        final_df.to_excel(report_path, index=False)
+
+        print("final data excel made successfully")
+
+        # download_url = url_for('download_file', filename=report_filename, _external=True)
+
+        print("report path:", report_filename)
+
+        return jsonify({
+            'status': True,
+            'message': 'Files processed successfully!',
+            'download_url': f'/download/{report_filename}',
+            'download_name': report_filename
+        })
+    except Exception as e:
+        return jsonify({'status': False, 'message': f'Error: {str(e)}'}), 500
+    
+    
+@app.route('/cancelled', methods=['POST'])
+def bkngcomcancelled():
+    if 'file1' not in request.files :
+        return jsonify({'status': False, 'message': 'stayflexi file  required!'}), 400
+
+    file1 = request.files.get('file1')
+    commission = (int(request.form.get('sliderValue')))/100
+    print("commission:",commission)
+    # file2 = request.files.get('file2')
+    # file3 = request.files.get('file3')  # Optional file
+    # file4 = request.files.get('file4')  # Optional file
+    # commission = (int(request.form.get('sliderValue')))/100
+    
+    # if not commission or not commission.isdigit():
+    #     commission = 30
+
+    print("file1:", file1)
+
+    if file1 and allowed_file(file1.filename):
+            filename1 = secure_filename(file1.filename)
+            file1.save(os.path.join(app.config['UPLOAD_FOLDER'], filename1))
+            # Optionally process file3 if needed
+
+        
+    try:
+        
+        bookingcompath = cancelled(os.path.join(app.config['UPLOAD_FOLDER'], filename1))
+
+        
+        final_df = pd.read_excel(bookingcompath)
+
+        os.makedirs('docs/Bookingcomcancelled', exist_ok=True)
+        unique_id = uuid.uuid4().hex
+        print("unique_id:", unique_id)
+        report_filename = f'bookingcom_cancelled_{unique_id}_.xlsx'
+        print("report_filename:", report_filename)
+        report_path = os.path.join('docs/Bookingcomcancelled', report_filename)
+        final_df.to_excel(report_path, index=False)
+
+        print("final data excel made successfully")
+
+        # download_url = url_for('download_file', filename=report_filename, _external=True)
+
+        print("report path:", report_filename)
+
+        return jsonify({
+            'status': True,
+            'message': 'Files processed successfully!',
+            'download_url': f'/download/{report_filename}',
+            'download_name': report_filename
+        })
+    except Exception as e:
+        return jsonify({'status': False, 'message': f'Error: {str(e)}'}), 500
     
 
 @app.route('/download/<filename>')
