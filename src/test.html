@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet">
+
+    <!-- jQuery (Required for Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Generate Report</h2>
+        <form id="fileForm">
+            <!-- Modified Property Selection with Search -->
+            <div class="input-group">
+                <label for="propertySelect">Search Property:</label>
+                <select id="propertySelect" class="searchable-select">
+                    <option value="">Select property...</option>
+                    <option value="property1">🏖️ Seaside Resort</option>
+                    <option value="property2">🏔️ Mountain Lodge</option>
+                    <option value="property3">🏙️ City Hotel Downtown</option>
+                    <option value="property4">🏝️ Beach Villa Complex</option>
+                    <option value="property5">🌅 Lake View Resort</option>
+                </select>
+            </div>
+    
+            <!-- Date Range Selector -->
+            <div class="input-group date-range">
+                <label>Select Date Range:</label>
+                <div class="date-inputs">
+                    <input type="date" id="startDate" name="startDate">
+                    <span>to</span>
+                    <input type="date" id="endDate" name="endDate">
+                </div>
+            </div>
+    
+            <div class="input-group">
+                <label for="file1">File Stayflexi :</label>
+                <input type="file" id="file1" accept=".xlsx, .csv">
+            </div>
+            
+            <div class="input-group">
+                <label for="file2">File MMT :</label>
+                <input type="file" id="file2" accept=".xlsx, .csv">
+            </div>
+    
+            <div class="input-group">
+                <label for="file3">Prev Week Old MMT:</label>
+                <input type="file" id="file3" accept=".xlsx, .csv">
+            </div>
+            
+            <div class="input-group">
+                <label for="file4">Prev Week New MMT:</label>
+                <input type="file" id="file4" accept=".xlsx, .csv">
+            </div>
+    
+            <div class="input-group">
+                <label for="slider">Commission Percentage Value (1-50):</label>
+                <input type="range" id="slider" min="1" max="50" value="30">
+                <span id="sliderValue" style="font-weight: bold; margin-left: 10px;">30</span>
+            </div>
+    
+            <div class="row btn">
+                <button type="button" id="submitFiles">MMT Success Report</button>
+                <button type="button" id="submitFiles1">MMT&Booking.com Report</button>
+                <button type="button" id="submitFiles2">Booking.com Success Report</button>
+                <button type="button" id="submitFiles3">Booking.com Cancelled Report</button>
+            </div>
+            
+            <div id="alertMessage" class="alert"></div>
+        </form>
+    </div>
+
+    <!-- Select2 JS -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script> -->
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+                $("#propertySelect").select2({
+                    placeholder: "Search or select a property...",
+                    allowClear: true,
+                    width: "100%",
+                    templateResult: formatProperty,
+                    templateSelection: formatProperty
+                });
+
+                function formatProperty(property) {
+                    if (!property.id) {
+                        return property.text;
+                    }
+                    return $('<span>' + property.text + '</span>');
+                }
+        });
+    </script>
+
+
+  
+</body>
+</html>
