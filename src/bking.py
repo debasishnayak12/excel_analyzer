@@ -28,30 +28,49 @@ def stayflexiBookingcom(file,percent):
 
     # Create the output directory if it doesn't exist
     os.makedirs('docs/bkingcomReport', exist_ok=True)
-    output_path = Path('docs/bookingcom') / f'BOOKINGCOM_REPORT{Path(file).name}'
+    output_path = Path('docs/bkingcomReport') / f'BOOKINGCOM_REPORT{Path(file).name}'
     print("output path",output_path)
 
-    # Save the filtered data to the specified path
-    # filtered_data.to_excel(output_path, index=False)
 
-    # Check if the file was saved successfully
-    # if output_path.exists():
-    #     return str(output_path)
-    # else:
-    #     return None
-
-    importantcolumns = ['Booking Id','Guest','Booking Date','Source','Check In Date','Check Out Date','Total Amount (INR)','Payment Made (INR)']
+    importantcolumns = ['Booking Id','Guest','Booking Date','Source','Check In Date','Check Out Date','Total Amount (INR)']
 
     importantdata = filtered_data[importantcolumns]
+    new_importahntdata = importantdata.copy()
+    new_importahntdata.fillna(0, inplace=True)
     print("importantdata",importantdata)
-    importantdata.rename(columns={'Booking Id':'BookingID','Guest':'Customer Name','Source':'Booking Vendor'},inplace=True)
+    new_importahntdata.rename(columns={'Booking Id':'BookingID','Guest':'Customer Name','Source':'Booking Vendor'},inplace=True)
 
-    importantdata['(12%)GST ON Total Amount'] = importantdata['Total Amount (INR)']*0.12
-    importantdata['Tabtrips share'] = (importantdata['Total Amount (INR)'] - importantdata['(12%)GST ON Total Amount']) * (percent)
-    importantdata['(18%)GST ON Tabtripsshare'] = importantdata['Tabtrips share'] * 0.18
-    importantdata['HotelNeedToPay'] = importantdata['(12%)GST ON Total Amount'] + importantdata['Tabtrips share'] +importantdata['(18%)GST ON Tabtripsshare']
-    print("importantdata final",importantdata)
-    importantdata.to_excel(output_path, index=False)
+    new_importahntdata['(12%)GST ON Total Amount'] = new_importahntdata['Total Amount (INR)']*0.12
+    new_importahntdata['Tabtrips share'] = (new_importahntdata['Total Amount (INR)'] - new_importahntdata['(12%)GST ON Total Amount']) * (percent)
+    new_importahntdata['(18%)GST ON Tabtripsshare'] = new_importahntdata['Tabtrips share'] * 0.18
+
+    new_importahntdata[['Total Amount (INR)', 'Tabtrips share', '(18%)GST ON Tabtripsshare']] = (
+    new_importahntdata[['Total Amount (INR)', 'Tabtrips share', '(18%)GST ON Tabtripsshare']]
+    .apply(pd.to_numeric, errors='coerce')
+    )
+    new_importahntdata['HotelNeedToPay'] = new_importahntdata['(12%)GST ON Total Amount'] + new_importahntdata['Tabtrips share'] +new_importahntdata['(18%)GST ON Tabtripsshare']
+    print("importantdata final",new_importahntdata)
+
+    new_row = pd.Series({
+        'BookingID': "Total",
+        'Customer Name': np.nan,
+        'Booking Date': np.nan,
+        'Booking Vendor': np.nan,
+        'Check In Date': np.nan,
+        'Check Out Date': np.nan,
+        'Total Amount (INR)': new_importahntdata['Total Amount (INR)'].sum() ,
+        '(12%)GST ON Total Amount': new_importahntdata['(12%)GST ON Total Amount'].sum(), # Keep as a number, not a string
+        'Tabtrips share': new_importahntdata['Tabtrips share'].sum(),
+        '(18%)GST ON Tabtripsshare': new_importahntdata['(18%)GST ON Tabtripsshare'].sum(),
+        'HotelNeedToPay': new_importahntdata['HotelNeedToPay'].sum()
+    })
+
+    new_df = new_row.to_frame().T
+    print("new_df",new_df.shape)
+
+    # Concatenate both DataFrames
+    final_data = pd.concat([new_importahntdata, new_df], ignore_index=True)
+    final_data.to_excel(output_path, index=False)
  
     # Check if the file was saved successfully
     if output_path.exists():
@@ -80,32 +99,46 @@ def cancelled(file):
     os.makedirs('docs/bookingcom/cancelled', exist_ok=True)
     output_path = Path('docs/bookingcom/cancelled') / f'BOOKINGCOM_cancelled{Path(file).name}'
 
-    # Save the filtered data to the specified path
-    # filtered_data.to_excel(output_path, index=False)
-
-    # Check if the file was saved successfully
-    # if output_path.exists():
-    #     return str(output_path)
-    # else:
-    #     return None
-
     importantcolumns = ['Booking Id','Guest','Booking Date','Source','Check In Date','Check Out Date','Total Amount (INR)']
 
-    importantdata = filtered_data[importantcolumns]
-    new_row = {
-                'Booking Id': f"Total",  # or you can use None if you prefer
-                'Guest': np.nan,
-                'Booking Date': np.nan,
-                'Source': np.nan,
-                'Check In Date': np.nan,
-                'Check Out Date': np.nan,
-                'Total Amount (INR)': f"{importantdata['Total Amount (INR)']}"
-            }
-    
-    new_df = pd.DataFrame([new_row])
-    final_data = pd.concat([importantdata, new_df], ignore_index=True)
+    # importantdata = filtered_data[importantcolumns]
+    # importantdata_new = importantdata.copy()
 
-    final_data.rename(columns={'Booking Id':'BookingID','Guest':'Customer Name','Source':'Booking Vendor'},inplace=True)
+    # importantdata_new.rename(columns={'Booking Id':'BookingID','Guest':'Customer Name','Source':'Booking Vendor'},inplace=True)
+    # new_row = {
+    #             'BookingID': f"Total",  # or you can use None if you prefer
+    #             'Customer Name': np.nan,
+    #             'Booking Date': np.nan,
+    #             'Booking Vendor': np.nan,
+    #             'Check In Date': np.nan,
+    #             'Check Out Date': np.nan,
+    #             'Total Amount (INR)': importantdata_new['Total Amount (INR)'].sum()
+    #         }
+    
+    # new_df = pd.DataFrame([new_row])
+    # final_data = pd.concat([importantdata, new_df], ignore_index=True)
+    importantdata = filtered_data[importantcolumns].copy()
+
+# Rename columns
+    importantdata.rename(columns={'Booking Id': 'BookingID', 'Guest': 'Customer Name', 'Source': 'Booking Vendor'}, inplace=True)
+
+    # Create a new row with total sum
+    new_row = pd.Series({
+        'BookingID': "Total",
+        'Customer Name': np.nan,
+        'Booking Date': np.nan,
+        'Booking Vendor': np.nan,
+        'Check In Date': np.nan,
+        'Check Out Date': np.nan,
+        'Total Amount (INR)': importantdata['Total Amount (INR)'].sum()  # Keep as a number, not a string
+    })
+
+    # Convert the new_row to a DataFrame and ensure column order matches
+    new_df = new_row.to_frame().T
+
+    # Concatenate both DataFrames
+    final_data = pd.concat([importantdata, new_df], ignore_index=True)
+    print("final_data",final_data)
 
     # importantdata['(12%)GST ON Total Amount'] = importantdata['Total Amount (INR)']*0.12
     # importantdata['Tabtrips share'] = (importantdata['Total Amount (INR)'] - importantdata['(12%)GST ON Total Amount']) * (percent)

@@ -8,7 +8,7 @@ import uuid
 from mmt import mmt_result
 from stayflexi import stayflexi
 from old_pending import update_pending
-from bookingcom import stayflexiBookingcom,cancelled
+from bking import stayflexiBookingcom,cancelled
 
 app = Flask(__name__)
 
@@ -80,7 +80,7 @@ def upload_files():
                 return jsonify({'status': False, 'message': 'Error processing file1'}), 500
             print('stayflexipath:', stayflexipath)
             
-            stayflexiBookingcompath = stayflexiBookingcom((os.path.join(app.config['UPLOAD_FOLDER'], filename1)),commission)
+            # stayflexiBookingcompath = stayflexiBookingcom((os.path.join(app.config['UPLOAD_FOLDER'], filename1)),commission)
 
             print('start mmt')
             final_data_path = mmt_result(os.path.join(app.config['UPLOAD_FOLDER'], filename2), stayflexipath)
@@ -206,7 +206,7 @@ def bkngcomreport():
         
         final_df = pd.read_excel(bookingcompath)
 
-        os.makedirs('docs/Bookingcomreport', exist_ok=True)
+        os.makedirs('docs/report', exist_ok=True)
         unique_id = uuid.uuid4().hex
         print("unique_id:", unique_id)
         report_filename = f'bookingcom_report_{unique_id}_.xlsx'
@@ -236,8 +236,8 @@ def bkngcomcancelled():
         return jsonify({'status': False, 'message': 'stayflexi file  required!'}), 400
 
     file1 = request.files.get('file1')
-    commission = (int(request.form.get('sliderValue')))/100
-    print("commission:",commission)
+    # commission = (int(request.form.get('sliderValue')))/100
+    # print("commission:",commission)
     # file2 = request.files.get('file2')
     # file3 = request.files.get('file3')  # Optional file
     # file4 = request.files.get('file4')  # Optional file
@@ -261,12 +261,12 @@ def bkngcomcancelled():
         
         final_df = pd.read_excel(bookingcompath)
 
-        os.makedirs('docs/Bookingcomcancelled', exist_ok=True)
+        os.makedirs('docs/report', exist_ok=True)
         unique_id = uuid.uuid4().hex
         print("unique_id:", unique_id)
         report_filename = f'bookingcom_cancelled_{unique_id}_.xlsx'
         print("report_filename:", report_filename)
-        report_path = os.path.join('docs/Bookingcomcancelled', report_filename)
+        report_path = os.path.join('docs/report', report_filename)
         final_df.to_excel(report_path, index=False)
 
         print("final data excel made successfully")
