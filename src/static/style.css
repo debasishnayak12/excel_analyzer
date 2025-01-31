@@ -93,3 +93,21 @@ button:focus {
 .alert.info {
     background-color: #2196F3;
 }
+.row.btn {
+    display: flex;
+    gap: 10px; /* Adjust spacing between buttons */
+}
+
+.row.btn button {
+    white-space: nowrap; /* Prevents text wrapping */
+    padding: 10px 15px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.row.btn button:hover {
+    background-color: #0056b3;
+}
