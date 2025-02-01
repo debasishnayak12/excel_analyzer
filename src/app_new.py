@@ -30,7 +30,8 @@ def allowed_file(filename):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    # return render_template('index.html')
+    return render_template('index_new.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_files():

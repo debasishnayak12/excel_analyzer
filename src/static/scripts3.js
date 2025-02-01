@@ -58,11 +58,31 @@ $(document).ready(function() {
     // Example usage with your buttons
     $("#submitFiles").on("click", function(e) {
         e.preventDefault();
+        var selectedReportType = $('input[name="reportType"]:checked').val();
+        console.log("Selected report type:", selectedReportType);
+        if (!selectedReportType) {
+            alert('Please select a report type.');
+            return;
+        }
 
-        let checkmark = $("#includeExtra").is(":checked") ? "Yes" : "No";
+        if(selectedReportType === 'onlyBookingcom') {
+            url = 'http://127.0.0.1:5000/bookingcomreport';
+        }
+        else if(selectedReportType === 'BCOMCancelled') {
+            url = 'http://127.0.0.1:5000/cancelled';
+        }
+        else if(selectedReportType === 'onlyMMT' || selectedReportType === 'onlyMMT2') {
+            url = 'http://127.0.0.1:5000/upload';
+        }
+        else{
+            alert('Please select a report type.');
+            return;
+        }
+
+        // let checkmark = $("#includeExtra").is(":checked") ? "Yes" : "No";
 
         const formData = getFormData();
-        formData.append('checkmark', checkmark);
+        formData.append('checkmark', selectedReportType);
         
         if (formData) {
             // Example of how to use the formData
@@ -74,7 +94,7 @@ $(document).ready(function() {
             // Example AJAX call
             
             $.ajax({
-                url: 'http://127.0.0.1:5000/upload',
+                url: url,
                 type: 'POST',
                 data: formData,
                 processData: false,

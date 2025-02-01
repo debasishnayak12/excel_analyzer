@@ -43,7 +43,7 @@
                     <option value="Lake View Resort">🌅 Lake View Resort</option>
                 </select>
             </div>
-
+    
             <!-- Date Range Selector -->
             <div class="input-group date-range">
                 <label>Select Date Range:</label>
@@ -70,21 +70,33 @@
                 <span id="sliderValue" style="font-weight: bold; margin-left: 10px;">30</span>
             </div>
     
+            <!-- Report Type Selection -->
+            <div class="input-group">
+                <label>Select Report Type:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" name="reportType" value="onlyMMT" class="report-checkbox"> Only MMT
+                    </label>
+                    <label>
+                        <input type="checkbox" name="reportType" value="bothMMTandBCOM" class="report-checkbox"> Both MMT & BCOM
+                    </label>
+                    <label>
+                        <input type="checkbox" name="reportType" value="onlyBookingcom" class="report-checkbox"> Only Booking.com
+                    </label>
+                    <label>
+                        <input type="checkbox" name="reportType" value="BCOMCancelled" class="report-checkbox"> BCOM Cancelled
+                    </label>
+                </div>
+            </div>
+    
             <div class="row btn">
-                <button type="button" id="submitFiles">MMT & BCOM Report</button>
-
-                <label for="includeExtra" style="margin-left: 10px;">
-                    <input type="checkbox" id="includeExtra"> Include BCOM
-                </label>
-
-                <!-- <button type="button" id="submitFiles1">MMT&Booking.com Report</button> -->
-                <button type="button" id="submitFiles2">Booking.com Success Report</button>
-                <button type="button" id="submitFiles3">Booking.com Cancelled Report</button>
+                <button type="submit" id="submitFiles">Generate Report</button>
             </div>
             
             <div id="alertMessage" class="alert"></div>
         </form>
     </div>
+    
 
     <!-- <script src="{{ url_for('static', filename='scripts.js') }}"></script> -->
     <script src="{{ url_for('static', filename='scripts2.js') }}"></script>
