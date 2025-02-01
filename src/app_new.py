@@ -42,9 +42,9 @@ def upload_files():
     file1 = request.files.get('file1')
     
     file2 = request.files.get('file2')
-    file3 = request.files.get('file3')  # Optional file
-    file4 = request.files.get('file4')  # Optional file
-    bookingcomcheck = request.form.get('bookingcheck')
+    print("file1:",file1)
+    print("file2:",file2)
+    bookingcomcheck = request.form.get('checkmark')
 
     hotelname = request.form.get('property', '').replace(" ", "_")
     startDate = request.form.get('startDate', '').replace("-", "_")
@@ -71,34 +71,6 @@ def upload_files():
         file1.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{hotelname}_stayflexi_{startDate}_{endDate}_{randn}{ext1}"))
         file2.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{hotelname}_mmt_{startDate}_{endDate}_{randn}{ext2}"))
 
-        file3 = request.files.get('file3')  # Optional file
-        file4 = request.files.get('file4')  # Optional file
-
-        if file3:
-            if allowed_file(file3.filename):
-                filename3 = secure_filename(file3.filename)
-                _, ext3 = os.path.splitext(filename3)
-                file3.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{hotelname}_{startDate}_{endDate}_{randn}{ext3}"))
-            else:
-                return jsonify({'status': False, 'message': 'Please select .xlsx or .csv file'}), 400
-                # Optionally process file3 if needed
-        if file4:
-            if allowed_file(file4.filename):
-                filename4 = secure_filename(file4.filename)
-                _, ext4 = os.path.splitext(filename4)
-                file4.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{hotelname}_{startDate}_{endDate}_{randn}{ext4}"))
-            else:
-                return jsonify({'status': False, 'message': 'Please select .xlsx or .csv file'}), 400
-                # Optionally process file4 if needed
-
-        if file3 and file4:
-            print("file3 and file4")
-            old_final_data_path = update_pending(os.path.join(app.config['UPLOAD_FOLDER'], f"{hotelname}_{startDate}_{endDate}_{randn}{ext3}"),
-                                                 os.path.join(app.config['UPLOAD_FOLDER'], f"{hotelname}_{startDate}_{endDate}_{randn}{ext4}"))
-            old_data = pd.read_excel(old_final_data_path)
-        else:
-            old_data = None
-
         try:
             print('start stayflexipath')
             stayflexipath = stayflexi(os.path.join(app.config['UPLOAD_FOLDER'], f"{hotelname}_stayflexi_{startDate}_{endDate}_{randn}{ext1}"))
@@ -115,18 +87,9 @@ def upload_files():
 
             final_data = pd.read_excel(final_data_path)
             print("final_data:",final_data)
-            if old_data is not None:
-                final_data = pd.concat([final_data, old_data], ignore_index=True)
-                # final_data.drop_duplicates(subset=['BookingID', 'Customer Name', 'Booking Vendor', 'Check-in', 'Check-out'], inplace=True)
-                print("final_data after concat:",final_data)   
 
             print("old data is none") 
 
-            # final_data['GST on commission'] = ((final_data['Room Charges (A)']) * 0.30) * 0.18
-            # final_data['TB commission'] = ((final_data["Room Charges (A)"]) * 0.30)
-            # final_data['PayToHotel'] = final_data['Room Charges (A)'] - (
-            #     final_data['GST on commission'] + ((final_data["Room Charges (A)"]) * 0.30)
-            # )
             final_data['GST on commission'] = ((final_data['Room Charges (A)']) * commission) * 0.18
             final_data['TB commission'] = ((final_data["Room Charges (A)"]) * commission)
             final_data['PayToHotel'] = final_data['Room Charges (A)'] - (
@@ -189,16 +152,11 @@ def upload_files():
 
 
             os.makedirs('docs/report', exist_ok=True)
-            # unique_id = uuid.uuid4().hex
-            # print("unique_id:", unique_id)
-            # report_filename = f'report_{unique_id}_.xlsx'
             print("report_filename:", report_filename)
             report_path = os.path.join('docs/report', report_filename)
             final_data.to_excel(report_path, index=False)
 
             print("final data excel made successfully")
-
-            # download_url = url_for('download_file', filename=report_filename, _external=True)
 
             print("report path:", report_path)
 

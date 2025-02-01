@@ -45,6 +45,7 @@ def mmt_result(file1, file2):
         'BookingID','Customer Name', 'Booking Vendor','Room Charges (A)','Amount Paid', 'Payment Status', 'Check-in','Check-out',
         'Payment Date'
     ]
+    
 
     # Filter only required columns if they exist
     final_df = merged_df[[col for col in important_columns if col in merged_df.columns]]

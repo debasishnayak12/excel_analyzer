@@ -65,19 +65,24 @@
             </div>
     
             <div class="input-group">
+                <label for="file3">Prev Week Old MMT:</label>
+                <input type="file" id="file3" accept=".xlsx, .csv">
+            </div>
+            
+            <div class="input-group">
+                <label for="file4">Prev Week New MMT:</label>
+                <input type="file" id="file4" accept=".xlsx, .csv">
+            </div>
+    
+            <div class="input-group">
                 <label for="slider">Commission Percentage Value (1-50):</label>
                 <input type="range" id="slider" min="1" max="50" value="30">
                 <span id="sliderValue" style="font-weight: bold; margin-left: 10px;">30</span>
             </div>
     
             <div class="row btn">
-                <button type="button" id="submitFiles">MMT & BCOM Report</button>
-
-                <label for="includeExtra" style="margin-left: 10px;">
-                    <input type="checkbox" id="includeExtra"> Include Extra
-                </label>
-
-                <!-- <button type="button" id="submitFiles1">MMT&Booking.com Report</button> -->
+                <button type="button" id="submitFiles">MMT Success Report</button>
+                <button type="button" id="submitFiles1">MMT&Booking.com Report</button>
                 <button type="button" id="submitFiles2">Booking.com Success Report</button>
                 <button type="button" id="submitFiles3">Booking.com Cancelled Report</button>
             </div>
@@ -86,6 +91,25 @@
         </form>
     </div>
 
+    <!-- Initialize Select2 after DOM is ready -->
+    <!-- <script>
+        $(document).ready(function() {
+            // Wait for a moment to ensure Select2 is fully loaded
+            setTimeout(function() {
+                $("#propertySelect").select2({
+                    placeholder: "Search or select a property...",
+                    allowClear: true,
+                    width: '100%',
+                    minimumResultsForSearch: 0
+                });
+            }, 100);
+            
+            // Slider value update
+            $("#slider").on('input', function() {
+                $("#sliderValue").text($(this).val());
+            });
+        });
+    </script> -->
     <!-- <script src="{{ url_for('static', filename='scripts.js') }}"></script> -->
     <script src="{{ url_for('static', filename='scripts2.js') }}"></script>
 </body>
